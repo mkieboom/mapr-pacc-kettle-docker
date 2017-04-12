@@ -40,3 +40,6 @@ COPY core-site.xml /opt/data-integration/plugins/pentaho-big-data-plugin/hadoop-
 # Use Kettle pan.sh (for transformations) or kitchen.sh (for jobs) to launch the ETl processes
 # For example:
 # /opt/data-integration/pan.sh -file /mapr/demo.mapr.com/kettle_export/maprdb-production-transformation-hbase1.1.1.xml
+# These commands can be launched from the Dockerfile using options like CMD or ENTRYPOINT, eg:
+# CMD python pythondicom.py
+# ENTRYPOINT ["node", "/myfolder/index.js"]

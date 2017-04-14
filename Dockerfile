@@ -5,8 +5,9 @@
 
 #
 # Using MapR PACC as the base image
-#
-FROM maprtech/pacc
+# For specific versions check: https://hub.docker.com/r/maprtech/pacc/tags/
+#FROM maprtech/pacc:5.2.1_3.0_centos7
+FROM maprtech/pacc:5.2.0_2.0_centos7
 
 MAINTAINER mkieboom @mapr.com
 

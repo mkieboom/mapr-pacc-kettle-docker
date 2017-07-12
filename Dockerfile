@@ -19,14 +19,26 @@ RUN sed -ie "s/artifactory.devops.lab\/artifactory\/prestage/package.mapr.com/g"
 # Install prerequisites
 RUN yum install -y unzip
 
-# Donwload & install Pentaho Data Integration 5.4.0.1-130
-RUN curl -L -o /opt/pdi-ce-5.4.0.1-130.zip https://downloads.sourceforge.net/project/pentaho/Data%20Integration/5.4/pdi-ce-5.4.0.1-130.zip && \
-    unzip /opt/pdi-ce-5.4.0.1-130.zip -d /opt/ && \
-    chmod +x /opt/data-integration/*.sh
+# Donwload Pentaho Data Integration 5.4.0.1-130
+RUN curl -L -o /opt/pdi-ce-5.4.0.1-130.zip https://downloads.sourceforge.net/project/pentaho/Data%20Integration/5.4/pdi-ce-5.4.0.1-130.zip
 
-# Download & Install the MapR v5.2.0 Shim (TEMPORARY LOCATED AT S3)
-RUN curl -L -o /opt/pentaho-hadoop-shims-mapr520-package-54.2015.06.01.zip https://s3-eu-west-1.amazonaws.com/mkieboom/kettle/pentaho-hadoop-shims-mapr520-package-54.2015.06.01.zip && \
-    unzip /opt/pentaho-hadoop-shims-mapr520-package-54.2015.06.01.zip -d /opt/data-integration/plugins/pentaho-big-data-plugin/hadoop-configurations/
+# Copy Pentaho Data Integration 5.4.0.1-130 into the container (instead of Downloading)
+# COPY pdi-ce-5.4.0.1-130.zip /opt/
+
+# Install Pentaho Data Integration 5.4.0.1-130
+RUN unzip /opt/pdi-ce-5.4.0.1-130.zip -d /opt/ && \
+    chmod +x /opt/data-integration/*.sh && \
+    rm -rf /opt/pdi-ce-5.4.0.1-130.zip
+
+# Download the MapR v5.2.0 Shim (TEMPORARY LOCATED AT S3)
+RUN curl -L -o /opt/pentaho-hadoop-shims-mapr520-package-54.2015.06.01.zip https://s3-eu-west-1.amazonaws.com/mkieboom/kettle/pentaho-hadoop-shims-mapr520-package-54.2015.06.01.zip
+
+# Copy the MapR v5.2.0 Shim (instead of Downloading)
+# COPY pentaho-hadoop-shims-mapr520-package-54.2015.06.01.zip /opt/
+
+# Install the MapR v5.2.0 Shim
+RUN unzip /opt/pentaho-hadoop-shims-mapr520-package-54.2015.06.01.zip -d /opt/data-integration/plugins/pentaho-big-data-plugin/hadoop-configurations/ && \
+    rm -rf /opt/pentaho-hadoop-shims-mapr520-package-54.2015.06.01.zip
 
 # Configure Kettle to make use of MapR Shim
 RUN sed -ie "s/active.hadoop.configuration=hadoop-20/active.hadoop.configuration=mapr520/g" /opt/data-integration/plugins/pentaho-big-data-plugin/plugin.properties
@@ -39,8 +51,7 @@ COPY hbase-site.xml /opt/data-integration/plugins/pentaho-big-data-plugin/hadoop
 COPY core-site.xml /opt/data-integration/plugins/pentaho-big-data-plugin/hadoop-configurations/mapr520/core-site.xml
 
 # Use Kettle pan.sh (for transformations) or kitchen.sh (for jobs) to launch the ETl processes
-# For example:
+# For example, to launch:
 # /opt/data-integration/pan.sh -file /mapr/demo.mapr.com/kettle_export/maprdb-production-transformation-hbase1.1.1.xml
-# These commands can be launched from the Dockerfile using options like CMD or ENTRYPOINT, eg:
-# CMD python myscript.py
-# ENTRYPOINT ["node", "/myfolder/index.js"]
+# Would look like:
+# CMD ["start","sh","-c","/opt/data-integration/pan.sh -file /mapr/demo.mapr.com/kettle_export/maprdb-production-transformation-hbase1.1.1.xml"]
